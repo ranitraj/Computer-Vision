@@ -1,0 +1,29 @@
+%Hough Transform to find lines
+
+%Load an Image and Convert to Grayscale to apply canny Filter
+im = imread('lines.jpg');
+im_gray = rgb2gray(im);
+im_edge = edge(im_gray, 'canny');
+
+figure, imshow(im), title('Original Image');
+figure, imshow(im_gray), title('Grayscale Image');
+figure, imshow(im_edge), title('Canny Filter Edge');
+
+%Apply Hough Transform to Find the Candidate Lines
+[accum theta rho] = hough(im_edge);
+figure, imagesc(accum, 'xData', theta, 'ydata', rho), title('Hough Accumulator');
+
+peaks = houghpeaks(accum, 100, 'Threshold', ceil(0.6 * max(accum(:))),'NHoodSize', [5,5]);
+size(peaks);
+
+%Finding the line segments in the image
+line_segs = houghlines(edges, theta, rows, peaks, 'FillGap', 50,'MinLength', 100);
+
+%Plotting
+figure, imshow(im), title('Line Segments');
+hold on;
+for k=1:length(line_segs)
+  endpoints = [line_segs(k).point1; line_segs(k).point2];
+  plot(endpoints(:,1), endpoints(:,2), 'LineWidth', 2, 'Color','green');
+end
+hold off;
